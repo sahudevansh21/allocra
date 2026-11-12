@@ -1,0 +1,26 @@
+# Environment & Secrets
+.env*
+*.pem
+*.key
+*.keystore
+keystores/
+
+# Dependencies & Build Outputs
+node_modules/
+dist/
+build/
+out/
+.next/
+.vercel/
+
+# Hardhat & Foundry
+cache/
+artifacts/
+broadcast/
+
+# Operating System & Archives
+.DS_Store
+*.zip
+*.tar.gz
+*.log
+.codex*

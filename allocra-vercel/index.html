@@ -1,0 +1,413 @@
+<!doctype html>
+<html lang="en" class="motion-pending">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#cf2d17">
+  <meta name="description" content="Allocra helps you plan allocations across eligible tokenized assets before you place a trade.">
+  <title>Allocra — Your assets. Your allocation.</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+  <script>
+    const revealPage = () => document.documentElement.classList.remove('motion-pending');
+    window.addEventListener('DOMContentLoaded', () => {
+      requestAnimationFrame(() => requestAnimationFrame(revealPage));
+    }, { once: true });
+    window.setTimeout(revealPage, 3200);
+  </script>
+  <style>
+    :root {
+      color-scheme: dark;
+      --red: #d82f17;
+      --red-bright: #f1411e;
+      --ink: #1c100d;
+      --ink-soft: #382019;
+      --paper: #f6d6bd;
+      --paper-dim: #dba891;
+      --line: rgba(246, 214, 189, .36);
+      --glass: rgba(45, 17, 12, .32);
+      --ease: cubic-bezier(.22, 1, .36, 1);
+      --sans: "DM Sans", Arial, sans-serif;
+      --display: "Instrument Serif", Georgia, serif;
+      --mono: "DM Mono", monospace;
+    }
+
+    * { box-sizing: border-box; }
+    html { background: var(--red); }
+    body { margin: 0; min-width: 320px; background: var(--red); color: var(--paper); font-family: var(--sans); overflow: hidden; }
+    button { font: inherit; }
+    button, a { -webkit-tap-highlight-color: transparent; }
+    button:focus-visible, a:focus-visible, input:focus-visible { outline: 2px solid var(--paper); outline-offset: 4px; }
+
+    .viewport { min-height: 100svh; isolation: isolate; overflow: hidden; position: relative; }
+    .screen { min-height: 100svh; position: relative; overflow: hidden; background: var(--red); }
+    .screen::before {
+      content: ""; position: absolute; inset: 0; z-index: -2; opacity: .43; pointer-events: none;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 240 240' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.82' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.42'/%3E%3C/svg%3E");
+      mix-blend-mode: multiply;
+    }
+    .screen::after { content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none; background: radial-gradient(ellipse at 67% 43%, transparent 0 26%, rgba(89, 8, 3, .14) 64%, rgba(54, 4, 2, .35) 100%); }
+    .shell { width: min(100% - 72px, 1430px); margin: 0 auto; }
+
+    .topline { position: absolute; inset: 35px auto auto calc(50% - 128px); z-index: 5; display: flex; align-items: flex-start; width: 256px; color: var(--paper); }
+    .season { font: 10px/1 var(--mono); letter-spacing: .34em; padding-top: 8px; opacity: .72; }
+    .rule { display: flex; align-items: center; flex: 1; max-width: 230px; margin: 10px 0 0 25px; color: rgba(246, 214, 189, .68); }
+    .rule::before, .rule::after { content: ""; height: 1px; background: currentColor; }
+    .rule::before { width: 7px; }
+    .rule::after { flex: 1; margin-left: 7px; }
+    .rule b { font-size: 18px; font-weight: 400; line-height: 0; margin-left: 7px; transform: translateY(-1px); }
+
+    .site-header { position: absolute; inset: 28px 36px auto; z-index: 4; display: flex; justify-content: flex-end; align-items: center; min-height: 42px; }
+    .brand { color: var(--paper); display: inline-flex; align-items: center; gap: 11px; text-decoration: none; margin-right: auto; font: 500 15px/1 var(--sans); letter-spacing: -.05em; }
+    .brand-mark { width: 25px; height: 25px; color: var(--paper); filter: drop-shadow(0 1px 2px rgba(58, 4, 0, .24)); }
+    .brand-mark path { transform-origin: 50% 50%; }
+    .desktop-nav { display: flex; gap: 29px; align-items: center; }
+    .nav-button { appearance: none; background: none; border: 0; padding: 7px 0; color: rgba(246, 214, 189, .73); cursor: pointer; font: 500 10px/1 var(--mono); letter-spacing: .12em; text-transform: uppercase; transition: color 180ms ease, opacity 180ms ease; }
+    .nav-button:hover { color: var(--paper); }
+    .nav-button:first-child { color: var(--paper); }
+    .nav-button:first-child::after { content: ""; display: block; width: 100%; height: 1px; margin-top: 6px; background: currentColor; }
+    .header-action { margin-left: 34px; border: 1px solid rgba(246,214,189,.45); color: var(--paper); background: rgba(65, 9, 5, .11); padding: 10px 15px; cursor: pointer; font: 500 10px/1 var(--mono); letter-spacing: .08em; text-transform: uppercase; transition: background 180ms ease, transform 180ms var(--ease); }
+    .header-action:hover { background: rgba(246,214,189,.13); transform: translateY(-2px); }
+    .menu-toggle { display: none; }
+
+    .hero-copy { position: absolute; z-index: 2; left: max(36px, calc((100vw - 1430px) / 2)); bottom: clamp(52px, 9.1vh, 94px); max-width: 650px; }
+    .hero-kicker { margin: 0 0 22px; color: rgba(246,214,189,.83); font: 500 10px/1.5 var(--mono); text-transform: uppercase; letter-spacing: .16em; }
+    .hero-title { margin: 0; max-width: 630px; font: 400 clamp(68px, 7.35vw, 123px)/.82 var(--display); letter-spacing: -.068em; }
+    .line { display: block; overflow: hidden; padding-bottom: .08em; }
+    .line:last-child { color: rgba(246,214,189,.72); padding-left: .18em; }
+    .line-reveal { display: block; }
+    .hero-description { margin: 26px 0 0 3px; max-width: 420px; color: rgba(255,229,210,.86); font-size: clamp(15px, 1.27vw, 18px); line-height: 1.46; letter-spacing: -.016em; }
+    .hero-actions { display: flex; gap: 15px; align-items: center; margin-top: 31px; }
+    .primary-cta, .secondary-cta { border: 0; cursor: pointer; }
+    .primary-cta { min-width: 171px; display: flex; justify-content: space-between; align-items: center; padding: 5px 5px 5px 17px; border-radius: 2px; color: var(--ink); background: var(--paper); font-weight: 600; font-size: 14px; letter-spacing: -.025em; box-shadow: 0 4px 18px rgba(85, 8, 2, .2); transition: transform 220ms var(--ease), background 180ms ease; }
+    .primary-cta:hover { transform: translateY(-3px); background: #fff0e3; }
+    .cta-arrow { display: grid; place-items: center; width: 32px; height: 32px; background: var(--ink); color: var(--paper); }
+    .cta-arrow svg { width: 15px; height: 15px; }
+    .secondary-cta { color: var(--paper); background: transparent; padding: 9px 0; border-bottom: 1px solid rgba(246,214,189,.55); font: 500 11px/1 var(--mono); letter-spacing: .07em; text-transform: uppercase; transition: border-color 180ms ease, transform 180ms var(--ease); }
+    .secondary-cta:hover { border-color: var(--paper); transform: translateY(-2px); }
+    .legal-note { display: flex; align-items: center; gap: 8px; margin: 19px 0 0 3px; color: rgba(246,214,189,.67); font: 10px/1.35 var(--mono); letter-spacing: .025em; }
+    .legal-note svg { width: 12px; height: 12px; flex: none; }
+
+    .editorial-portrait { position: absolute; z-index: 0; right: clamp(14px, 7vw, 140px); bottom: -6vh; width: min(47vw, 695px); aspect-ratio: .82; pointer-events: none; }
+    .portrait-halo { position: absolute; width: 88%; aspect-ratio: 1; right: 3%; top: 0; border: 1px solid rgba(246,214,189,.32); border-radius: 50%; }
+    .portrait-halo::before { content: ""; position: absolute; inset: 16% -12%; border: 1px solid rgba(246,214,189,.12); border-radius: 50%; }
+    .portrait { position: absolute; inset: 4% 0 0; overflow: hidden; }
+    .portrait svg { width: 100%; height: 100%; overflow: visible; filter: drop-shadow(0 22px 24px rgba(83, 5, 1, .21)); }
+    .capital-line { position: absolute; right: -2%; bottom: 15%; width: 32%; height: 30%; border-right: 1px solid rgba(246,214,189,.22); border-top: 1px solid rgba(246,214,189,.22); transform: skewY(-18deg); }
+    .capital-line::after { content: ""; position: absolute; right: -42px; bottom: -1px; width: 42px; border-bottom: 1px solid rgba(246,214,189,.22); }
+
+    .planner-card { position: absolute; z-index: 3; right: max(36px, calc((100vw - 1430px) / 2)); bottom: clamp(34px, 6.7vh, 75px); width: clamp(277px, 25.5vw, 370px); padding: 19px; color: var(--paper); border: 1px solid rgba(246,214,189,.42); background: linear-gradient(145deg, rgba(62, 17, 10, .56), rgba(35, 8, 6, .68)); box-shadow: inset 0 1px 0 rgba(255,240,228,.08), 0 16px 35px rgba(81,6,1,.17); backdrop-filter: blur(18px) saturate(112%); -webkit-backdrop-filter: blur(18px) saturate(112%); }
+    .planner-card::before { content: ""; position: absolute; inset: 5px; pointer-events: none; border: 1px solid rgba(246,214,189,.12); }
+    .planner-topline { position: relative; display: flex; align-items: flex-start; justify-content: space-between; }
+    .card-eyebrow { margin: 0; color: rgba(246,214,189,.7); font: 10px/1.4 var(--mono); text-transform: uppercase; letter-spacing: .12em; }
+    .card-status { display: inline-flex; align-items: center; gap: 6px; font: 10px/1 var(--mono); color: #ffd8c3; }
+    .card-status::before { content: ""; width: 6px; height: 6px; background: #f1bf8f; border-radius: 50%; box-shadow: 0 0 0 3px rgba(241,191,143,.14); }
+    .card-title { position: relative; margin: 8px 0 17px; font: 400 27px/1 var(--display); letter-spacing: -.035em; }
+    .card-body { position: relative; display: grid; grid-template-columns: 95px 1fr; gap: 17px; align-items: center; }
+    .allocation-ring { --a: 55%; --b: 27%; --c: 18%; width: 94px; aspect-ratio: 1; display: grid; place-items: center; border-radius: 50%; background: conic-gradient(var(--paper) 0 var(--a), #9a2d1f var(--a) calc(var(--a) + var(--b)), #4a1b13 calc(var(--a) + var(--b)) 100%); box-shadow: inset 0 0 0 1px rgba(255,234,216,.42), 0 8px 18px rgba(38,4,1,.18); transition: background 500ms var(--ease); }
+    .allocation-ring::after { content: ""; width: 63px; aspect-ratio: 1; border-radius: 50%; background: #4a170f; box-shadow: inset 0 0 0 1px rgba(246,214,189,.21); }
+    .ring-value { position: absolute; z-index: 1; font: 500 12px/1 var(--mono); letter-spacing: -.08em; }
+    .basket-list { display: grid; gap: 9px; }
+    .basket-row { display: grid; grid-template-columns: 8px 1fr auto; align-items: center; gap: 7px; font-size: 11px; }
+    .basket-row i { display: block; width: 7px; height: 7px; border-radius: 50%; background: var(--paper); }
+    .basket-row:nth-child(2) i { background: #9a2d1f; }
+    .basket-row:nth-child(3) i { background: #4a1b13; box-shadow: 0 0 0 1px rgba(246,214,189,.5); }
+    .basket-row span { color: rgba(246,214,189,.81); letter-spacing: -.025em; }
+    .basket-row b { color: var(--paper); font: 500 10px/1 var(--mono); }
+    .purchase-control { position: relative; margin-top: 20px; padding-top: 15px; border-top: 1px solid rgba(246,214,189,.23); }
+    .control-row { display: flex; align-items: baseline; justify-content: space-between; }
+    .control-row label, .control-row output { font: 10px/1 var(--mono); text-transform: uppercase; letter-spacing: .08em; }
+    .control-row label { color: rgba(246,214,189,.7); }
+    .control-row output { color: var(--paper); }
+    input[type="range"] { appearance: none; width: 100%; height: 18px; margin: 9px 0 2px; background: transparent; cursor: pointer; }
+    input[type="range"]::-webkit-slider-runnable-track { height: 2px; background: linear-gradient(90deg, var(--paper) 0 var(--range-fill, 42%), rgba(246,214,189,.24) var(--range-fill, 42%) 100%); }
+    input[type="range"]::-moz-range-track { height: 2px; background: linear-gradient(90deg, var(--paper) 0 var(--range-fill, 42%), rgba(246,214,189,.24) var(--range-fill, 42%) 100%); }
+    input[type="range"]::-webkit-slider-thumb { appearance: none; width: 12px; height: 12px; margin-top: -5px; border: 1px solid var(--paper); border-radius: 50%; background: var(--red-bright); box-shadow: 0 1px 5px rgba(47,2,0,.43); }
+    input[type="range"]::-moz-range-thumb { width: 11px; height: 11px; border: 1px solid var(--paper); border-radius: 50%; background: var(--red-bright); box-shadow: 0 1px 5px rgba(47,2,0,.43); }
+    .card-stats { position: relative; display: grid; grid-template-columns: repeat(3, 1fr); gap: 7px; margin-top: 15px; }
+    .stat { padding-top: 9px; border-top: 1px solid rgba(246,214,189,.2); }
+    .stat span { display: block; color: rgba(246,214,189,.64); font: 8px/1.25 var(--mono); letter-spacing: .05em; text-transform: uppercase; }
+    .stat strong { display: block; margin-top: 4px; font: 500 11px/1 var(--mono); color: var(--paper); }
+    .preset-row { position: relative; display: flex; gap: 7px; margin-top: 18px; }
+    .preset { flex: 1; border: 1px solid rgba(246,214,189,.32); background: rgba(246,214,189,.03); color: rgba(246,214,189,.76); padding: 8px 5px; cursor: pointer; font: 9px/1 var(--mono); letter-spacing: .04em; transition: background 180ms ease, color 180ms ease, border-color 180ms ease; }
+    .preset:hover, .preset[aria-pressed="true"] { color: var(--ink); border-color: var(--paper); background: var(--paper); }
+    .card-footnote { position: relative; display: flex; gap: 6px; margin: 13px 0 0; color: rgba(246,214,189,.68); font: 9px/1.35 var(--mono); }
+    .card-footnote svg { width: 11px; flex: none; }
+
+    .lower-meta { position: absolute; left: 36px; right: 36px; bottom: 24px; z-index: 2; display: flex; justify-content: space-between; color: rgba(246,214,189,.52); font: 9px/1 var(--mono); text-transform: uppercase; letter-spacing: .12em; pointer-events: none; }
+    .mark-constellation { position: absolute; z-index: 1; bottom: 26%; left: 3%; width: 85px; height: 85px; opacity: .65; transform: rotate(-9deg); }
+    .mark-constellation span { position: absolute; display: block; width: 20px; height: 64px; left: 33px; top: 10px; background: linear-gradient(90deg, #c79a61, #4a2814 47%, #e6c287); border-radius: 3px 9px 6px 2px; transform-origin: 10px 33px; box-shadow: inset 1px 0 rgba(255,231,190,.55); }
+    .mark-constellation span:nth-child(2) { transform: rotate(72deg); }
+    .mark-constellation span:nth-child(3) { transform: rotate(144deg); }
+    .mark-constellation span:nth-child(4) { transform: rotate(216deg); }
+    .mark-constellation span:nth-child(5) { transform: rotate(288deg); }
+
+    dialog { width: min(480px, calc(100vw - 36px)); margin: auto; padding: 0; color: var(--paper); border: 1px solid rgba(246,214,189,.53); background: #42150e; box-shadow: 0 26px 70px rgba(32,2,0,.5); }
+    dialog::backdrop { background: rgba(52, 4, 1, .66); backdrop-filter: blur(4px); }
+    .dialog-inner { padding: 29px; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.12'/%3E%3C/svg%3E"); }
+    .dialog-label { margin: 0 0 12px; color: var(--paper-dim); font: 10px/1 var(--mono); letter-spacing: .13em; text-transform: uppercase; }
+    .dialog-inner h2 { margin: 0; font: 400 41px/.93 var(--display); letter-spacing: -.045em; }
+    .dialog-inner p { color: rgba(246,214,189,.78); line-height: 1.45; }
+    .dialog-metrics { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; margin: 23px 0; background: rgba(246,214,189,.2); border: 1px solid rgba(246,214,189,.2); }
+    .dialog-metrics div { padding: 13px; background: rgba(68,18,11,.78); }
+    .dialog-metrics span { display: block; color: rgba(246,214,189,.62); font: 9px/1.2 var(--mono); text-transform: uppercase; }
+    .dialog-metrics b { display: block; margin-top: 7px; font: 500 13px/1 var(--mono); }
+    .dialog-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 24px; }
+    .dialog-actions button { padding: 11px 13px; cursor: pointer; border: 1px solid rgba(246,214,189,.43); color: var(--paper); background: transparent; font: 10px/1 var(--mono); text-transform: uppercase; letter-spacing: .09em; }
+    .dialog-actions button:last-child { color: var(--ink); border-color: var(--paper); background: var(--paper); }
+
+    .motion-pending .brand, .motion-pending .desktop-nav, .motion-pending .header-action, .motion-pending .hero-kicker, .motion-pending .hero-description, .motion-pending .hero-actions, .motion-pending .legal-note, .motion-pending .planner-card, .motion-pending .lower-meta { opacity: 0; }
+    .motion-pending .line-reveal { transform: translate3d(0,110%,0) skewY(3deg); }
+    .motion-pending .hero-description, .motion-pending .hero-actions { transform: translateY(13px); }
+    .motion-pending .planner-card { transform: translateY(18px) scale(.97); }
+    html:not(.motion-pending) .brand { animation: enter-up 600ms var(--ease) both 60ms; }
+    html:not(.motion-pending) .desktop-nav { animation: enter-up 620ms var(--ease) both 150ms; }
+    html:not(.motion-pending) .header-action { animation: enter-up 620ms var(--ease) both 210ms; }
+    html:not(.motion-pending) .hero-kicker { animation: enter-up 560ms var(--ease) both 280ms; }
+    html:not(.motion-pending) .line:first-child .line-reveal { animation: enter-line 840ms var(--ease) both 360ms; }
+    html:not(.motion-pending) .line:last-child .line-reveal { animation: enter-line 900ms var(--ease) both 470ms; }
+    html:not(.motion-pending) .hero-description { animation: enter-up 620ms var(--ease) both 720ms; }
+    html:not(.motion-pending) .hero-actions { animation: enter-up 600ms var(--ease) both 850ms; }
+    html:not(.motion-pending) .legal-note { animation: enter-up 620ms var(--ease) both 930ms; }
+    html:not(.motion-pending) .planner-card { animation: enter-card 900ms var(--ease) both 700ms; }
+    html:not(.motion-pending) .lower-meta { animation: enter-up 600ms var(--ease) both 1080ms; }
+    html:not(.motion-pending) .mark-constellation { animation: slow-turn 24s linear infinite; }
+    @keyframes enter-up { from { opacity: 0; transform: translateY(9px); } to { opacity: 1; transform: none; } }
+    @keyframes enter-line { from { transform: translate3d(0,110%,0) skewY(3deg); } to { transform: none; } }
+    @keyframes enter-card { from { opacity: 0; transform: translateY(18px) scale(.97); } to { opacity: 1; transform: none; } }
+    @keyframes slow-turn { to { transform: rotate(351deg); } }
+
+    @media (max-width: 960px) {
+      .editorial-portrait { right: -30px; width: min(61vw, 575px); opacity: .79; }
+      .planner-card { right: 28px; }
+      .hero-copy { left: 34px; max-width: 540px; }
+      .hero-title { font-size: clamp(64px, 9.3vw, 95px); }
+      .desktop-nav { display: none; }
+      .menu-toggle { display: grid; place-items: center; width: 42px; height: 42px; margin-left: 16px; border: 1px solid rgba(246,214,189,.45); color: var(--paper); background: rgba(65,9,5,.2); cursor: pointer; }
+      .menu-toggle svg { width: 18px; }
+      .mobile-menu { position: absolute; z-index: 7; top: 82px; right: 28px; display: grid; min-width: 215px; padding: 8px; opacity: 0; visibility: hidden; transform: translateY(-8px) scale(.98); border: 1px solid rgba(246,214,189,.36); background: rgba(65,12,7,.78); box-shadow: 0 13px 30px rgba(69,4,1,.23); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); transition: opacity 180ms ease, transform 180ms var(--ease), visibility 180ms; }
+      .mobile-menu.open { opacity: 1; visibility: visible; transform: none; }
+      .mobile-menu button { padding: 13px 10px; border: 0; background: none; color: var(--paper); text-align: left; cursor: pointer; font: 10px/1 var(--mono); letter-spacing: .1em; text-transform: uppercase; }
+      .mobile-menu button:hover { background: rgba(246,214,189,.1); }
+    }
+    @media (min-width: 961px) { .mobile-menu { display: none; } }
+    @media (max-width: 670px) {
+      body { overflow: auto; }
+      .viewport, .screen { min-height: 100svh; overflow: hidden; }
+      .topline { inset: 20px auto auto 50%; width: 124px; transform: translateX(-50%); }
+      .season { font-size: 8px; }
+      .rule { max-width: 120px; margin-left: 13px; }
+      .site-header { inset: 14px 18px auto; }
+      .brand { font-size: 14px; }
+      .brand-mark { width: 23px; height: 23px; }
+      .header-action { display: none; }
+      .menu-toggle { margin-left: 0; }
+      .mobile-menu { top: 64px; right: 18px; }
+      .hero-copy { left: 22px; right: 22px; bottom: 33px; max-width: none; }
+      .hero-kicker { margin-bottom: 13px; font-size: 8px; }
+      .hero-title { max-width: 340px; font-size: clamp(54px, 17.2vw, 76px); line-height: .84; }
+      .line:last-child { padding-left: .06em; }
+      .hero-description { margin-top: 18px; max-width: 306px; font-size: 14px; }
+      .hero-actions { margin-top: 22px; }
+      .primary-cta { min-width: 153px; font-size: 13px; }
+      .secondary-cta { font-size: 9px; }
+      .legal-note { max-width: 255px; font-size: 8px; }
+      .editorial-portrait { right: -69px; top: 74px; bottom: auto; width: 438px; opacity: .61; }
+      .planner-card { right: 18px; top: 150px; bottom: auto; width: min(245px, calc(100vw - 36px)); padding: 14px; transform: scale(.88); transform-origin: top right; }
+      .card-title { font-size: 24px; margin-bottom: 12px; }
+      .card-body { grid-template-columns: 78px 1fr; gap: 11px; }
+      .allocation-ring { width: 76px; }
+      .allocation-ring::after { width: 51px; }
+      .ring-value { font-size: 10px; }
+      .purchase-control { margin-top: 12px; padding-top: 11px; }
+      .preset-row { margin-top: 12px; }
+      .card-footnote { display: none; }
+      .mark-constellation { left: auto; right: 26px; top: 82px; bottom: auto; transform: scale(.55); transform-origin: top right; opacity: .36; }
+      .lower-meta { left: 18px; right: 18px; bottom: 15px; font-size: 7px; }
+    }
+    @media (max-height: 660px) and (min-width: 671px) { .planner-card { transform: scale(.86); transform-origin: bottom right; } .hero-title { font-size: clamp(58px, 7vw, 90px); } .hero-description { margin-top: 17px; } .hero-actions { margin-top: 20px; } }
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; scroll-behavior: auto !important; } .motion-pending * { opacity: 1 !important; transform: none !important; } }
+  </style>
+</head>
+<body>
+  <main class="viewport">
+    <section class="screen" aria-labelledby="page-title">
+      <div class="topline" aria-hidden="true"><span class="season">MMXXVI</span><span class="rule"><b>+</b></span></div>
+      <header class="site-header">
+        <a class="brand" href="#home" aria-label="Allocra home">
+          <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true"><path fill="currentColor" d="M16 1.5 19.3 11l9.7-3.1-7.2 7.1 7.2 7.1-9.7-3.1L16 30.5 12.7 19 3 22.1l7.2-7.1L3 7.9 12.7 11z"/><circle cx="16" cy="16" r="4.1" fill="#d82f17"/></svg>
+          <span>Allocra</span>
+        </a>
+        <nav class="desktop-nav" aria-label="Allocra information">
+          <button class="nav-button" type="button" data-dialog="planner-dialog">Planner</button>
+          <button class="nav-button" type="button" data-dialog="diagnostics-dialog">Diagnostics</button>
+          <button class="nav-button" type="button" data-dialog="method-dialog">Method</button>
+        </nav>
+        <button class="header-action" type="button" data-dialog="planner-dialog">Start a plan</button>
+        <button class="menu-toggle" id="menu-toggle" type="button" aria-expanded="false" aria-controls="mobile-menu" aria-label="Open menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M3 7.5h18M3 16.5h18"/></svg></button>
+      </header>
+
+      <nav class="mobile-menu" id="mobile-menu" aria-label="Allocra information" inert>
+        <button type="button" data-dialog="planner-dialog">Planner</button>
+        <button type="button" data-dialog="diagnostics-dialog">Diagnostics</button>
+        <button type="button" data-dialog="method-dialog">Method</button>
+      </nav>
+
+      <div class="editorial-portrait" aria-hidden="true">
+        <div class="portrait-halo"></div>
+        <div class="portrait">
+          <svg viewBox="0 0 650 790" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="coat" x1="0" x2="1" y1="0" y2="1"><stop stop-color="#1d1714"/><stop offset=".52" stop-color="#34201a"/><stop offset="1" stop-color="#120d0b"/></linearGradient>
+              <linearGradient id="skin" x1=".1" x2=".85" y1="0" y2="1"><stop stop-color="#e3a581"/><stop offset=".65" stop-color="#945038"/><stop offset="1" stop-color="#4a211a"/></linearGradient>
+            </defs>
+            <path fill="#260d0a" d="M159 760 133 564q-4-83 82-110l89-17 106 14q86 28 91 117l-14 192z"/>
+            <path fill="url(#coat)" d="m178 762-27-183q-8-85 92-115l70-23 97 24q94 26 98 114l-15 183z"/>
+            <path fill="#f0cfb4" d="m273 439 42 16 45-18-8 73-39 28-36-27z"/>
+            <path fill="#11100f" d="m278 509 35 29 45-30 33 254H235z"/>
+            <path fill="#f4dfd0" d="m272 509 40 29-37 85-62-123zM358 509l-46 29 38 85 63-124z"/>
+            <path fill="url(#skin)" d="M244 168q22-92 87-93 79 5 88 106l-9 167q-29 90-94 90-76-9-94-93z"/>
+            <path fill="#261613" d="M232 207q-9-109 79-131 99-5 118 94l-40 10-31-69-18 50-69 23 6 69z"/>
+            <path fill="#21120e" d="M253 162q44-97 117-78 41 12 53 70l-27-22-12-37-17 28-45-20-16 34z"/>
+            <path fill="#1a1210" d="M295 248q14-13 31 0l-4 8-29 3zM350 247q14-13 31 0l-4 8-29 3z"/>
+            <path fill="#2c1714" d="M316 299h13l-5 22z"/>
+            <path fill="#5a271d" d="M297 355q29 17 58-2-5 26-30 27-22-3-28-25z"/>
+            <path fill="#d07759" opacity=".4" d="M245 301q20-23 40-5l-8 22-36 3zM356 294q28-16 48 18l-36 9z"/>
+            <path fill="#5d3222" d="M182 570q-76 41-110 102l-41 112h118l46-117zM439 569q75 39 109 101l41 114H471l-45-116z"/>
+            <path fill="url(#skin)" d="M102 629q-23 25-32 71l30 23 31-49zM548 625q25 29 32 74l-32 22-29-50z"/>
+            <path fill="none" stroke="#d9ab8c" opacity=".36" d="M171 441q143 53 318 2M191 615q121 62 276 0" stroke-width="2"/>
+          </svg>
+        </div>
+        <div class="capital-line"></div>
+      </div>
+
+      <div class="mark-constellation" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span></div>
+
+      <section class="hero-copy" id="home">
+        <p class="hero-kicker">Private allocation desk / 01</p>
+        <h1 class="hero-title" id="page-title"><span class="line"><span class="line-reveal">Your assets.</span></span><span class="line"><span class="line-reveal">Your allocation.</span></span></h1>
+        <p class="hero-description">Plan a tokenized ETF basket around the positions you actually want to own. See concentration, overlap, quotes, and trading costs before you confirm.</p>
+        <div class="hero-actions">
+          <button class="primary-cta" type="button" data-dialog="planner-dialog"><span>Build a basket</span><span class="cta-arrow"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.25" aria-hidden="true"><path d="M3 8h9M8.5 3.5 13 8l-4.5 4.5"/></svg></span></button>
+          <button class="secondary-cta" type="button" data-dialog="method-dialog">How it works</button>
+        </div>
+        <p class="legal-note"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.25" aria-hidden="true"><circle cx="8" cy="8" r="6.2"/><path d="M8 7v4M8 4.7v.2"/></svg>Planning only. Assets stay individually held until you approve a trade.</p>
+      </section>
+
+      <aside class="planner-card" aria-label="Interactive allocation preview">
+        <div class="planner-topline"><p class="card-eyebrow">Allocation slate / draft</p><span class="card-status">Preview</span></div>
+        <h2 class="card-title" id="basket-name">Core allocation</h2>
+        <div class="card-body">
+          <div class="allocation-ring" id="allocation-ring"><span class="ring-value" id="ring-value">3 ETFs</span></div>
+          <div class="basket-list">
+            <div class="basket-row"><i></i><span id="asset-one">Global equity</span><b id="allocation-one">55%</b></div>
+            <div class="basket-row"><i></i><span id="asset-two">US treasury</span><b id="allocation-two">27%</b></div>
+            <div class="basket-row"><i></i><span id="asset-three">Gold trust</span><b id="allocation-three">18%</b></div>
+          </div>
+        </div>
+        <div class="purchase-control">
+          <div class="control-row"><label for="monthly-purchase">Monthly purchase</label><output id="monthly-output" for="monthly-purchase">$1,200</output></div>
+          <input id="monthly-purchase" type="range" min="250" max="3000" step="50" value="1200" aria-describedby="purchase-description" style="--range-fill:34.5%">
+          <span id="purchase-description" hidden>Set the amount used for the sample allocation preview.</span>
+        </div>
+        <div class="card-stats">
+          <div class="stat"><span>Issuer tilt</span><strong id="issuer-tilt">Low</strong></div>
+          <div class="stat"><span>Overlap</span><strong id="overlap">11%</strong></div>
+          <div class="stat"><span>Est. cost</span><strong id="estimated-cost">$2.52</strong></div>
+        </div>
+        <div class="preset-row" aria-label="Allocation style">
+          <button class="preset" type="button" data-preset="income" aria-pressed="false">Income</button>
+          <button class="preset" type="button" data-preset="core" aria-pressed="true">Core</button>
+          <button class="preset" type="button" data-preset="growth" aria-pressed="false">Growth</button>
+        </div>
+        <p class="card-footnote"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2" aria-hidden="true"><path d="M2.5 8h11M8 2.5v11"/></svg>Market-window and quote checks run at trade preview.</p>
+      </aside>
+      <div class="lower-meta" aria-hidden="true"><span>Eligible tokenized assets</span><span>Allocation is a decision, not a default.</span></div>
+    </section>
+  </main>
+
+  <dialog id="planner-dialog" aria-labelledby="planner-heading">
+    <div class="dialog-inner"><p class="dialog-label">Plan preview</p><h2 id="planner-heading">Your next purchase, in context.</h2><p id="planner-copy">A $1,200 monthly draft split across three individually held ETFs.</p><div class="dialog-metrics"><div><span>Contribution</span><b id="dialog-amount">$1,200</b></div><div><span>Est. costs</span><b id="dialog-cost">$2.52</b></div><div><span>Market window</span><b>Check first</b></div></div><p>Allocra compares available quotes and checks market windows before any trade preview. You review every order before it is submitted.</p><form method="dialog" class="dialog-actions"><button value="close">Close</button><button value="continue">Keep planning</button></form></div>
+  </dialog>
+  <dialog id="diagnostics-dialog" aria-labelledby="diagnostics-heading">
+    <div class="dialog-inner"><p class="dialog-label">Allocation diagnostics</p><h2 id="diagnostics-heading">See what a percentage hides.</h2><p>Each basket surfaces issuer concentration, holding overlap, estimated trading costs, and market-window context before you decide to buy or rebalance.</p><div class="dialog-metrics"><div><span>Overlap</span><b id="diagnostics-overlap">11%</b></div><div><span>Issuer tilt</span><b id="diagnostics-issuer">Low</b></div><div><span>Quotes</span><b>Compare</b></div></div><form method="dialog" class="dialog-actions"><button value="close">Close</button></form></div>
+  </dialog>
+  <dialog id="method-dialog" aria-labelledby="method-heading">
+    <div class="dialog-inner"><p class="dialog-label">The Allocra method</p><h2 id="method-heading">Plan first. Confirm each trade.</h2><p>Build a personal basket across eligible tokenized assets, set a recurring purchase plan, and inspect the practical costs of executing it. Assets remain individually held.</p><p>Automation and independent rebalance operators are later possibilities that require legal review. Any token role would not grant ownership of users’ ETFs.</p><form method="dialog" class="dialog-actions"><button value="close">Close</button></form></div>
+  </dialog>
+
+  <script>
+    const amount = document.querySelector('#monthly-purchase');
+    const amountOutput = document.querySelector('#monthly-output');
+    const dialogAmount = document.querySelector('#dialog-amount');
+    const cost = document.querySelector('#estimated-cost');
+    const dialogCost = document.querySelector('#dialog-cost');
+    const ring = document.querySelector('#allocation-ring');
+    const basketName = document.querySelector('#basket-name');
+    const allocations = [document.querySelector('#allocation-one'), document.querySelector('#allocation-two'), document.querySelector('#allocation-three')];
+    const assetNames = [document.querySelector('#asset-one'), document.querySelector('#asset-two'), document.querySelector('#asset-three')];
+    const overlap = document.querySelector('#overlap');
+    const diagnosticsOverlap = document.querySelector('#diagnostics-overlap');
+    const issuerTilt = document.querySelector('#issuer-tilt');
+    const diagnosticsIssuer = document.querySelector('#diagnostics-issuer');
+    const plannerCopy = document.querySelector('#planner-copy');
+    const presets = {
+      income: { name: 'Income allocation', assets: ['Dividend equity', 'US treasury', 'Real estate'], values: [35, 46, 19], overlap: '8%', issuer: 'Low', fee: .0018 },
+      core: { name: 'Core allocation', assets: ['Global equity', 'US treasury', 'Gold trust'], values: [55, 27, 18], overlap: '11%', issuer: 'Low', fee: .0021 },
+      growth: { name: 'Growth allocation', assets: ['US technology', 'Global equity', 'Gold trust'], values: [62, 27, 11], overlap: '28%', issuer: 'Elevated', fee: .0026 }
+    };
+    let selectedPreset = 'core';
+    const currency = value => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(value);
+    const updateAmount = () => {
+      const value = Number(amount.value);
+      const fill = ((value - Number(amount.min)) / (Number(amount.max) - Number(amount.min))) * 100;
+      const estimated = Math.max(1.05, value * presets[selectedPreset].fee);
+      amount.style.setProperty('--range-fill', `${fill}%`);
+      amountOutput.textContent = currency(value);
+      dialogAmount.textContent = currency(value);
+      cost.textContent = currency(estimated);
+      dialogCost.textContent = currency(estimated);
+      plannerCopy.textContent = `A ${currency(value)} monthly draft split across three individually held ETFs.`;
+    };
+    const updatePreset = presetKey => {
+      const preset = presets[presetKey];
+      selectedPreset = presetKey;
+      basketName.textContent = preset.name;
+      preset.assets.forEach((asset, index) => { assetNames[index].textContent = asset; allocations[index].textContent = `${preset.values[index]}%`; });
+      ring.style.setProperty('--a', `${preset.values[0]}%`);
+      ring.style.setProperty('--b', `${preset.values[1]}%`);
+      ring.style.setProperty('--c', `${preset.values[2]}%`);
+      overlap.textContent = preset.overlap;
+      diagnosticsOverlap.textContent = preset.overlap;
+      issuerTilt.textContent = preset.issuer;
+      diagnosticsIssuer.textContent = preset.issuer;
+      document.querySelectorAll('.preset').forEach(button => button.setAttribute('aria-pressed', String(button.dataset.preset === presetKey)));
+      updateAmount();
+    };
+    amount.addEventListener('input', updateAmount);
+    document.querySelectorAll('.preset').forEach(button => button.addEventListener('click', () => updatePreset(button.dataset.preset)));
+
+    const menuToggle = document.querySelector('#menu-toggle');
+    const mobileMenu = document.querySelector('#mobile-menu');
+    const closeMenu = () => { menuToggle.setAttribute('aria-expanded', 'false'); menuToggle.setAttribute('aria-label', 'Open menu'); mobileMenu.classList.remove('open'); mobileMenu.inert = true; };
+    menuToggle.addEventListener('click', () => {
+      const open = menuToggle.getAttribute('aria-expanded') !== 'true';
+      menuToggle.setAttribute('aria-expanded', String(open));
+      menuToggle.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+      mobileMenu.classList.toggle('open', open);
+      mobileMenu.inert = !open;
+    });
+    document.addEventListener('keydown', event => { if (event.key === 'Escape') closeMenu(); });
+    document.addEventListener('pointerdown', event => { if (!mobileMenu.contains(event.target) && !menuToggle.contains(event.target)) closeMenu(); });
+
+    document.querySelectorAll('[data-dialog]').forEach(trigger => trigger.addEventListener('click', () => {
+      closeMenu();
+      const dialog = document.querySelector(`#${trigger.dataset.dialog}`);
+      if (dialog && typeof dialog.showModal === 'function') dialog.showModal();
+    }));
+    document.querySelectorAll('dialog').forEach(dialog => dialog.addEventListener('click', event => { if (event.target === dialog) dialog.close(); }));
+    updateAmount();
+  </script>
+</body>
+</html>
